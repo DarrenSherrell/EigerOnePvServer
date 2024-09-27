@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 import epics
-
-# hello
+import numpy as np
 
 app = Flask(__name__)
+
 
 # Endpoint to get the value of a PV
 @app.route('/pv/<string:pvname>', methods=['GET'])
@@ -14,8 +14,8 @@ def get_pv(pvname):
     else:
         return jsonify({'error': f'PV {pvname} not found'}), 404
 
-# Endpoint to set the value of a PV
-@app.route('/pv/<string:pvname>', methods=['POST'])
+
+@app.route('/pv/<path:pvname>', methods=['POST'])
 def set_pv(pvname):
     data = request.get_json()
     if not data or 'value' not in data:
@@ -28,26 +28,48 @@ def set_pv(pvname):
     if not pv.connected:
         return jsonify({'error': f'PV {pvname} not found'}), 404
 
-    if pv.enum_strs:
-        # If the value is a string, find its corresponding index
+    pv_type = pv.type.lower()        # e.g., 'time_char', 'ctrl_float', etc.
+    pv_base_type = pv_type.split('_')[-1]  # Extract base type
+    pv_count = pv.count
+
+    print(f"PV Name: {pvname}")
+    print(f"PV Type: {pv_type}")
+    print(f"PV Base Type: {pv_base_type}")
+    print(f"PV Count: {pv_count}")
+
+    if pv_base_type == 'enum':
+        # Handle enum PVs
         if isinstance(value_to_set, str):
             try:
                 index = pv.enum_strs.index(value_to_set)
                 value_to_set = index
             except ValueError:
                 return jsonify({'error': f'Invalid enum value for {pvname}'}), 400
+        else:
+            try:
+                value_to_set = int(value_to_set)
+            except ValueError:
+                return jsonify({'error': f'Invalid enum value for {pvname}'}), 400
+    elif (pv_base_type == 'char' and pv_count > 1) or pv_base_type == 'string':
+        # Handle string PVs (char waveform or string PVs)
+        value_to_set = str(value_to_set)
     else:
-        # Convert value to the appropriate type
+        # For scalar numeric PVs
         try:
-            value_to_set = type(pv.value)(value_to_set)
-        except ValueError:
+            value_to_set = float(value_to_set)
+        except (ValueError, TypeError):
             return jsonify({'error': 'Invalid value type'}), 400
 
-    success = pv.put(value_to_set)
-    if success:
-        return jsonify({'pvname': pvname, 'value_set_to': data['value']}), 200
-    else:
-        return jsonify({'error': f'Failed to set PV {pvname}'}), 500
+    # Try to set the PV value
+    try:
+        success = pv.put(value_to_set, wait=True)
+        if success is not None:
+            return jsonify({'pvname': pvname, 'value_set_to': data['value']}), 200
+        else:
+            return jsonify({'error': f'Failed to set PV {pvname}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Failed to set PV {pvname}: {str(e)}'}), 500
+
 
 # Example endpoint to start acquisition
 @app.route('/acquire/start', methods=['POST'])
