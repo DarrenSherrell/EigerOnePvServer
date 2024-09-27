@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 import epics
 
-# test
-
 app = Flask(__name__)
 
 # Endpoint to get the value of a PV
