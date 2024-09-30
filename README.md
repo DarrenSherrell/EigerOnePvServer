@@ -41,4 +41,8 @@ Try these commands and make sure the response
 > GET http://localhost:5000/pv/21EIG1:cam1:NDAttributesFile
 > {"pvname":"21EIG1:cam1:NDAttributesFile","value":""}
 
-...more on Monday
+> curl -X POST -H "Content-Type: application/json" -d '{"value": "localtest"}' http://localhost:5000/pv/21EIG1:cam1:NDAttributesFile
+> {"pvname":"21EIG1:cam1:NDAttributesFile","value_set_to":"localtest"}
+
+
+ 
