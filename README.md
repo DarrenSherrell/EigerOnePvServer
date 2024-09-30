@@ -57,18 +57,28 @@ Try these commands and make sure the response
 When there is a successful for call to the server you should see something like this from the server window
 
 > PV Name: 21EIG1:cam1:NDAttributesFile
+
 > PV Type: time_char
+
 > PV Base Type: char
+
 > PV Count: 256
+
 > PV Value: local
+
 > 127.0.0.1 - - [30/Sep/2024 10:40:06] "GET /pv/21EIG1:cam1:NDAttributesFile HTTP/1.1" 200 -
+
 > PV Name: 21EIG1:cam1:NumTriggers
+
 > PV Type: time_long
+
 > PV Base Type: long
+
 > PV Count: 1
+
 > PV Value: 30
+
 > 127.0.0.1 - - [30/Sep/2024 10:40:17] "POST /pv/21EIG1:cam1:NumTriggers HTTP/1.1" 200 -
- 
 
 -------
 
