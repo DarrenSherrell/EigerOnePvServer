@@ -5,16 +5,29 @@ import numpy as np
 app = Flask(__name__)
 
 
-# Endpoint to get the value of a PV
+# GET the value of a PV
 @app.route('/pv/<string:pvname>', methods=['GET'])
 def get_pv(pvname):
+    print(f"PV Name: {pvname}")
+    pv = epics.PV(pvname)
+    pv.wait_for_connection(timeout=2.0)
+    if not pv.connected:
+        return jsonify({'error': f'PV {pvname} not found'}), 404
+    pv_type = pv.type.lower()        # e.g., 'time_char', 'ctrl_float', etc.
+    pv_base_type = pv_type.split('_')[-1]  # Extract base type
+    pv_count = pv.count
+    print(f"PV Type: {pv_type}")
+    print(f"PV Base Type: {pv_base_type}")
+    print(f"PV Count: {pv_count}")
     value = epics.caget(pvname, as_string=True)
     if value is not None:
+        print(f"PV Value: {value}")
         return jsonify({'pvname': pvname, 'value': value}), 200
     else:
         return jsonify({'error': f'PV {pvname} not found'}), 404
 
 
+# POST a value to a PV
 @app.route('/pv/<path:pvname>', methods=['POST'])
 def set_pv(pvname):
     data = request.get_json()
@@ -64,6 +77,7 @@ def set_pv(pvname):
     try:
         success = pv.put(value_to_set, wait=True)
         if success is not None:
+            print(f"PV Value: {data['value']}")
             return jsonify({'pvname': pvname, 'value_set_to': data['value']}), 200
         else:
             return jsonify({'error': f'Failed to set PV {pvname}'}), 500
