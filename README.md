@@ -82,3 +82,5 @@ When there is a successful for call to the server you should see something like 
 
 -------
 
+curl http://juniper.ls-cat.org:5000/pv/21EIG1:cam1:NDAttributesFile
+164.54.252
