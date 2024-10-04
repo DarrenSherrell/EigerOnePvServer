@@ -81,6 +81,9 @@ When there is a successful for call to the server you should see something like 
 > 127.0.0.1 - - [30/Sep/2024 10:40:17] "POST /pv/21EIG1:cam1:NumTriggers HTTP/1.1" 200 -
 
 -------
+ACCESSING FROM NETWORK (Not Juniper where the server is running)
 
-curl http://juniper.ls-cat.org:5000/pv/21EIG1:cam1:NDAttributesFile
-164.54.252
+Example:
+> curl http://juniper.ls-cat.org:5000/pv/21EIG1:cam1:NDAttributesFile
+
+http requests should be available everywhere on network 164.54.252.XX
